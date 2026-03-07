@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AccessMap — Campus Accessibility Navigator</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="header">
+    <h1>🗺️ AccessMap</h1>
+    <div id="score-banner">
+      📊 Campus Accessibility Score: <span id="score">Calculating...</span>
+    </div>
+    <p id="subtitle">Tap anywhere on the map to report an obstacle</p>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="legend">
+    <h3>📌 Legend:</h3>
+    <div><span class="dot red"></span> 🚨 Critical</div>
+    <div><span class="dot orange"></span> ⚠️ Moderate</div>
+    <div><span class="dot green"></span> ✅ Resolved</div>
+  </div>
+
+  <div id="modal-overlay" class="hidden">
+    <div id="modal">
+      <h2>📍 Report an Obstacle</h2>
+      <p id="modal-coords"></p>
+
+      <label for="obstacle-type">Type of Obstacle:</label>
+      <select id="obstacle-type">
+        <option value="broken_elevator">🛗 Broken Elevator</option>
+        <option value="blocked_ramp">🚧 Blocked Ramp</option>
+        <option value="narrow_door">🚪 Narrow Door</option>
+        <option value="flooded_path">💧 Flooded / Wet Path</option>
+        <option value="blocked_entrance">🔒 Blocked Accessible Entrance</option>
+        <option value="steep_ramp">📐 Steep Ramp</option>
+        <option value="resolved">✅ Mark as Resolved</option>
+      </select>
+
+      <label for="obstacle-desc">Description (optional):</label>
+      <textarea id="obstacle-desc" placeholder="e.g. Elevator near Block C is out of order..."></textarea>
+
+      <div id="modal-buttons">
+        <button id="btn-submit" onclick="submitReport()">📌 Drop Pin</button>
+        <button id="btn-cancel" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
