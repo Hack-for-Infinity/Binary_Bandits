@@ -34,8 +34,10 @@ const SEVERITY = {
 // APP STATE
 // ============================================================
 let map;
-let clickedLatLng = null;
-const markerObjects = {};
+let clickedLatLng  = null;
+let activeFilter   = "all";       // FEATURE 2 — current active filter
+const markerObjects = {};         // key → { marker, type }
+const allReports    = {};         // key → full report object
 
 // ============================================================
 // START
@@ -119,8 +121,9 @@ function loadReports() {
 
     // Remove all existing markers from map
     Object.keys(markerObjects).forEach(function(k) {
-      markerObjects[k].remove();
+      markerObjects[k].marker.remove();
       delete markerObjects[k];
+      delete allReports[k];
     });
 
     var data   = snapshot.val();
@@ -132,37 +135,68 @@ function loadReports() {
       Object.keys(data).forEach(function(key) {
         var report = data[key];
 
-        // Skip expired reports
+        // Skip expired
         if (report.expiresAt && report.expiresAt < now) return;
 
         total++;
         active++;
+
+        // Store report for filtering
+        allReports[key] = report;
+
         placeMarker(key, report);
       });
     }
 
     updateScore(total, active);
-
-    // FEATURE 1 — Update live report counter
     updateCounter(active);
+
+    // Re-apply current filter after data refreshes
+    applyFilter(activeFilter);
   });
 }
 
 // ============================================================
-// FEATURE 1 — UPDATE LIVE COUNTER
+// FEATURE 2 — SET FILTER
 // ============================================================
-function updateCounter(active) {
-  var el = document.getElementById("counter-number");
-  el.textContent = active;
+function setFilter(filterType) {
+  activeFilter = filterType;
 
-  // Change colour based on how many reports
-  if (active === 0) {
-    el.style.color = "#34d399";  // green — all clear
-  } else if (active <= 3) {
-    el.style.color = "#fbbf24";  // yellow — some issues
-  } else {
-    el.style.color = "#ef4444";  // red — many issues
-  }
+  // Update button styles — highlight active button
+  var buttons = document.querySelectorAll(".filter-btn");
+  buttons.forEach(function(btn) {
+    if (btn.getAttribute("data-filter") === filterType) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+
+  applyFilter(filterType);
+}
+
+// ============================================================
+// FEATURE 2 — APPLY FILTER TO MARKERS
+// ============================================================
+function applyFilter(filterType) {
+  Object.keys(markerObjects).forEach(function(key) {
+    var obj    = markerObjects[key];
+    var report = allReports[key];
+
+    if (!report) return;
+
+    if (filterType === "all" || report.type === filterType) {
+      // Show this marker
+      if (!map.hasLayer(obj.marker)) {
+        obj.marker.addTo(map);
+      }
+    } else {
+      // Hide this marker
+      if (map.hasLayer(obj.marker)) {
+        obj.marker.remove();
+      }
+    }
+  });
 }
 
 // ============================================================
@@ -172,7 +206,6 @@ function placeMarker(key, report) {
   var sev   = SEVERITY[report.type] || SEVERITY["blocked_ramp"];
   var votes = report.resolvedVotes || 0;
 
-  // Check if this device already voted on this pin
   var alreadyVoted = localStorage.getItem("voted_" + key) ? true : false;
 
   var icon = L.divIcon({
@@ -215,15 +248,11 @@ function placeMarker(key, report) {
 
   var popupHTML =
     '<div style="min-width:210px; font-family:sans-serif;">' +
-
       '<strong style="font-size:1rem; color:#60a5fa;">' +
         sev.emoji + ' ' + sev.label +
       '</strong><br/>' +
-
       '<span style="color:#94a3b8; font-size:0.78rem;">⏰ ' + timeAgo + '</span>' +
-
       '<p style="margin:8px 0; color:#e2e8f0;">' + report.description + '</p>' +
-
       '<div style="' +
         'background:#0f172a; border-radius:6px;' +
         'padding:6px 10px; margin-bottom:10px;' +
@@ -234,23 +263,21 @@ function placeMarker(key, report) {
           ? ' — <span style="color:#fbbf24;">' + remaining + ' more needed</span>'
           : '') +
       '</div>' +
-
       buttonHTML +
-
     '</div>';
 
   var marker = L.marker([report.lat, report.lng], { icon: icon })
     .addTo(map)
     .bindPopup(popupHTML);
 
-  markerObjects[key] = marker;
+  // Store marker AND its type so filter can use it
+  markerObjects[key] = { marker: marker, type: report.type };
 }
 
 // ============================================================
 // MARK AS RESOLVED — one vote per device per pin
 // ============================================================
 function markResolved(key) {
-
   var votedKey = "voted_" + key;
   if (localStorage.getItem(votedKey)) {
     showToast("⚠️ You have already marked this as resolved!");
@@ -270,7 +297,6 @@ function markResolved(key) {
       return;
     }
     if (committed && snapshot && snapshot.exists()) {
-
       localStorage.setItem(votedKey, "true");
 
       var votes     = snapshot.val().resolvedVotes;
@@ -284,6 +310,21 @@ function markResolved(key) {
       }
     }
   });
+}
+
+// ============================================================
+// LIVE COUNTER
+// ============================================================
+function updateCounter(active) {
+  var el = document.getElementById("counter-number");
+  el.textContent = active;
+  if (active === 0) {
+    el.style.color = "#34d399";
+  } else if (active <= 3) {
+    el.style.color = "#fbbf24";
+  } else {
+    el.style.color = "#ef4444";
+  }
 }
 
 // ============================================================
