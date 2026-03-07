@@ -1,93 +1,112 @@
-# 👋 Welcome to Hack for Infinity – Infinity 2K26!
+🗺️ AccessMap — The Waze for Campus Accessibility
 
-Hey team! 🎉 Welcome to your dedicated repository for the **Infinity 2K26 Hackathon** organized by the **IEEE Computer Society OUCE Student Chapter**.
+Know before you go.
 
-This is your team's space to build, commit, and submit your project. Organizers have access to this repo and will review your **commit history** to verify the project was built during hackathon hours — so make sure you're committing regularly throughout the day!
+A live, crowdsourced campus accessibility map that lets any student instantly report and view accessibility obstacles on campus — broken ramps, out-of-service elevators, flooded paths, and more — in real time.
 
-> ⏰ **The repository will be locked at 5:30 PM. No pushes will be accepted after that.**
+🏷️ Project Title
+AccessMap — Crowdsourced Campus Accessibility Navigator
+Team Name: Binary Bandits
+Hackathon: Infinity 2K26 — IEEE Computer Society OUCE Student Chapter
 
----
+👥 Team Members
+NameGitHub UsernameMd Abdullah Hyder@mdabdullahhyderSarthak Bhatnagar@sarthakbhatnagarMd Hussain Ali@mdhussainali
 
-## 📅 Quick Schedule
+❓ Problem Statement
+Wheelchair users and disabled students on campus have no reliable way of knowing whether a ramp is broken, an elevator is out of service, or a path is blocked by construction — until they are already stuck there, late and stranded.
+Google Maps and other navigation tools do not show real-time, hyper-local accessibility conditions on a college campus. There is no crowdsourced, student-driven solution to this problem.
+Who it affects: Students with mobility challenges, wheelchair users, students on crutches, or anyone with temporary injuries — anyone who depends on accessible infrastructure to attend class on time.
+Why it matters: The cost of this gap is real — missed classes, physical strain, and a campus that doesn't feel inclusive to everyone.
 
-| Time | Activity |
-|------|----------|
-| 8:30 – 9:00 AM | Reporting & registration |
-| 9:00 – 10:00 AM | Opening briefing & kickoff |
-| 10:00 AM – 1:00 PM | Development session |
-| 1:00 – 2:00 PM | Lunch break & **Round 1 evaluation** |
-| 2:00 – 5:30 PM | Development session & final prep |
-| 5:30 – 6:00 PM | **Final judging & presentations** |
+🏗️ System Architecture / Design
+┌─────────────────────────────────────────────────────┐
+│                   User's Browser                    │
+│                                                     │
+│  index.html  ──►  app.js  ──►  Leaflet.js (Map)    │
+│                      │                              │
+│                      ▼                              │
+│            Firebase Realtime Database               │
+│          (stores & syncs all reports live)          │
+│                      │                              │
+│         ┌────────────┴────────────┐                 │
+│         ▼                        ▼                  │
+│   New pin appears          All other users          │
+│   on YOUR map              see it instantly         │
+└─────────────────────────────────────────────────────┘
+Main Components:
 
----
+index.html — Single webpage, loads all scripts and styles
+style.css — Dark navy theme, responsive layout, filter bar, modal styles
+app.js — All logic: map init, Firebase read/write, filters, scoring, colour blind mode
+Firebase Realtime Database — Live data backend, syncs reports across all users instantly
+Leaflet.js + OpenStreetMap — Free interactive map, no API key required
 
-## ✅ Things to Remember
 
-- Commit your code **frequently** throughout the day
-- AI tools (ChatGPT, Copilot, etc.) are allowed — but be ready to **explain your code** to the judges
-- Pre-built or plagiarised projects will be **disqualified**
-- Bring your laptops, chargers, and any hardware you need
-- Include a **project document** in this repo (see required sections below)
+🛠️ Technologies Used
+CategoryTechnologyFrontendHTML5, CSS3, Vanilla JavaScriptMapLeaflet.js v1.9.4 + OpenStreetMap tilesDatabaseFirebase Realtime DatabaseFirebase SDKfirebase-app-compat + firebase-database-compat v9.23.0HostingGitHub PagesStoragelocalStorage (per-device vote tracking)
 
----
+⭐ Key Features
 
-## 📋 Judging Criteria
+🗺️ Live Campus Map — Leaflet.js map centered on the campus, loads instantly in any phone browser
+📍 Tap to Report — Click anywhere on the map to open a report form, pin drops instantly
+🔴🟠🟢 Colour-Coded Pins — Red for Critical (Elevator, Entrance), Orange for Moderate (Ramp, Door, Path)
+🔍 Filter Bar — 7 filter buttons to show only specific obstacle types
+✅ Mark as Resolved — 3 community votes permanently removes a pin from Firebase
+⏰ Auto-Expiry — Reports automatically expire after 24 hours if unconfirmed
+👁️ Colour Blind Mode — Switches pin colours to Blue/Yellow for red-green colour blind users
+📊 Live Accessibility Score — Campus is X% accessible right now — updates in real time
+🔢 Active Report Counter — Shows total live obstacles, colour-coded by urgency
 
-Projects will be evaluated on:
-- 💡 Innovation and originality
-- 🛠️ Technical implementation
-- 🌍 Practical impact and usefulness
-- 🎨 User experience and design
-- 🗣️ Clarity of presentation and explanation
 
----
+⚙️ How It Works
 
----
+Student opens AccessMap in their phone browser — no app install needed
+The live campus map loads with all active obstacle pins visible
+Student taps anywhere on the map → report form opens with auto-filled coordinates
+Student selects obstacle type (Elevator, Ramp, Door, Path, Entrance, Steep) and severity
+Report is saved to Firebase Realtime Database → a coloured pin appears instantly for everyone
+Other students can tap any pin, see details, and vote Mark as Resolved
+After 3 votes, the pin is permanently deleted from Firebase and removed from all maps
+Reports with no activity auto-expire after 24 hours to keep the map accurate
+The Accessibility Score recalculates after every change: 100 - (active reports × 4)
 
-# 📁 Fill This In — Your Project README
 
-> ✏️ *Replace everything below this line with your own project details*
-
----
-
-## 🏷️ Project Title
-
-*Your project name here*
-
-## 👥 Team Members
-
-| Name | GitHub Username |
-|------|----------------|
-| ...  | ...             |
-| ...  | ...             |
-
-## ❓ Problem Statement
-
-*What problem are you solving? Who does it affect and why does it matter?*
-
-## 🏗️ System Architecture / Design
-
-*Describe or diagram how your system is structured. What are the main components and how do they interact?*
-
-## 🛠️ Technologies Used
-
-*List the languages, frameworks, libraries, APIs, tools, etc. you used.*
-
-## ⭐ Key Features
-
-*What are the main features of your project?*
-
-## ⚙️ How It Works
-
-*Explain how your solution works, end to end. Walk through the main flow.*
-
-## 🚀 How to Run
-
-*Step-by-step instructions for running your project locally.*
-
-```bash
-# example
+🚀 How to Run
+bash# 1. Clone the repository
 git clone <repo-url>
-cd <project-folder>
-# add your setup/run commands here
-```
+cd AccessMap
+
+# 2. Open directly in browser — no build step needed
+# On Windows:
+start index.html
+
+# On Mac:
+open index.html
+
+# Or just drag index.html into any browser
+
+⚠️ Note: For Firebase live sync to work, open via a local server or deploy to GitHub Pages.
+The map and UI will load offline, but real-time pins require a Firebase connection.
+
+To run with live server (recommended):
+bash# If you have VS Code, install Live Server extension
+# Right-click index.html → Open with Live Server
+
+# Or use Python:
+python -m http.server 8000
+# Then open http://localhost:8000
+Live deployment: Hosted on GitHub Pages at https://<username>.github.io/AccessMap
+
+📁 Project Structure
+AccessMap/
+├── index.html      # Main webpage — loads all scripts and styles
+├── style.css       # Dark navy theme, responsive layout, modal, filter bar
+├── app.js          # All logic: map, Firebase, filters, scoring, colour blind mode
+└── README.md       # This file
+
+🌍 Impact
+
+Immediate — Any student can use it on day one, no signup required
+Scalable — Works for any campus, just change the coordinates
+Inclusive — Colour Blind Mode ensures it's accessible to all users
+Zero cost — Firebase free tier + GitHub Pages = ₹0 infrastructure
