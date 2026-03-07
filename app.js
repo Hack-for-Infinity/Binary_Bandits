@@ -14,8 +14,8 @@ const firebaseConfig = {
 // ====================================================
 // CAMPUS COORDINATES — your campus is already set ✅
 // ====================================================
-const CAMPUS_LAT  = 17.39198;
-const CAMPUS_LNG  = 78.31944;
+const CAMPUS_LAT  = 17.40759;
+const CAMPUS_LNG  = 78.52025;
 const CAMPUS_ZOOM = 17;
 
 // ====================================================
@@ -170,6 +170,9 @@ function placeMarker(key, report) {
   });
 
   const timeAgo   = getTimeAgo(report.timestamp);
+    const confirmations = report.confirmations || 0;
+  const remaining     = 3 - confirmations;
+
   const popupHTML = `
     <div style="min-width:200px;">
       <strong style="font-size:1rem; color:#60a5fa;">
@@ -177,6 +180,20 @@ function placeMarker(key, report) {
       </strong><br/>
       <span style="color:#94a3b8; font-size:0.78rem;">⏰ ${timeAgo}</span>
       <p style="margin:8px 0; color:#e2e8f0;">${report.description}</p>
+
+      <div style="
+        background:#0f172a; border-radius:6px;
+        padding:6px 10px; margin-bottom:8px;
+        font-size:0.78rem; color:#94a3b8;
+        text-align:center;
+      ">
+        🗳️ ${confirmations}/3 resolved confirmations
+        ${remaining > 0
+          ? `— <span style="color:#fbbf24;">${remaining} more needed to remove pin</span>`
+          : ``
+        }
+      </div>
+
       <button
         onclick="confirmReport('${key}')"
         style="
@@ -184,7 +201,7 @@ function placeMarker(key, report) {
           padding:8px 14px; border-radius:6px; cursor:pointer;
           font-size:0.85rem; width:100%; margin-top:4px;
         ">
-        👍 Still There! (${report.confirmations || 0})
+        ✅ Mark as Resolved (${confirmations}/3)
       </button>
     </div>
   `;
@@ -207,8 +224,18 @@ function confirmReport(key) {
       report.expiresAt     = Date.now() + (12 * 60 * 60 * 1000);
     }
     return report;
+  }, (error, committed, snapshot) => {
+    if (!error && committed && snapshot) {
+      const confirmations = snapshot.val().confirmations;
+      if (confirmations >= 3) {
+        // 3 people confirmed resolved — DELETE the report entirely
+        firebase.database().ref(`reports/${key}`).remove();
+        showToast("✅ Problem confirmed resolved by 3 people! Pin removed.");
+      } else {
+        showToast(`👍 Confirmed! ${confirmations}/3 people say this is resolved.`);
+      }
+    }
   });
-  showToast("👍 Confirmed! Report extended by 12 hours.");
 }
 
 // ====================================================
