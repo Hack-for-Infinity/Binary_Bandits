@@ -1,15 +1,28 @@
 // ====================================================
 // FIREBASE CONFIG — you will fill this in soon
 // ====================================================
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey:            "PASTE_YOUR_KEY_HERE",
-  authDomain:        "PASTE_YOUR_AUTH_DOMAIN_HERE",
-  databaseURL:       "PASTE_YOUR_DATABASE_URL_HERE",
-  projectId:         "PASTE_YOUR_PROJECT_ID_HERE",
-  storageBucket:     "PASTE_YOUR_STORAGE_BUCKET_HERE",
-  messagingSenderId: "PASTE_YOUR_SENDER_ID_HERE",
-  appId:             "PASTE_YOUR_APP_ID_HERE"
+  apiKey: "AIzaSyBQg_-PRD8Ix0DTFLqPPUDWH0hSJLWZ0fk",
+  authDomain: "accessmap-infinity.firebaseapp.com",
+  databaseURL: "https://accessmap-infinity-default-rtdb.firebaseio.com",
+  projectId: "accessmap-infinity",
+  storageBucket: "accessmap-infinity.firebasestorage.app",
+  messagingSenderId: "1035902927452",
+  appId: "1:1035902927452:web:22936174d8a7459d645c99",
+  measurementId: "G-FGXK28HW88"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 // ====================================================
 // YOUR CAMPUS COORDINATES
