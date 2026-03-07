@@ -19,9 +19,9 @@ const CAMPUS_LNG  = 78.31944;
 const CAMPUS_ZOOM = 17;
 
 // ============================================================
-// OBSTACLE TYPES
+// OBSTACLE COLOURS — normal mode and colour blind mode
 // ============================================================
-const SEVERITY = {
+const SEVERITY_NORMAL = {
   broken_elevator:  { color: "#ef4444", emoji: "🛗", label: "Broken Elevator",  level: "critical" },
   blocked_entrance: { color: "#ef4444", emoji: "🔒", label: "Blocked Entrance", level: "critical" },
   blocked_ramp:     { color: "#f97316", emoji: "🚧", label: "Blocked Ramp",     level: "moderate" },
@@ -30,14 +30,27 @@ const SEVERITY = {
   flooded_path:     { color: "#f97316", emoji: "💧", label: "Flooded Path",     level: "moderate" }
 };
 
+const SEVERITY_COLOURBLIND = {
+  broken_elevator:  { color: "#2563eb", emoji: "🛗", label: "Broken Elevator",  level: "critical" },
+  blocked_entrance: { color: "#2563eb", emoji: "🔒", label: "Blocked Entrance", level: "critical" },
+  blocked_ramp:     { color: "#d97706", emoji: "🚧", label: "Blocked Ramp",     level: "moderate" },
+  narrow_door:      { color: "#d97706", emoji: "🚪", label: "Narrow Door",      level: "moderate" },
+  steep_ramp:       { color: "#d97706", emoji: "📐", label: "Steep Ramp",       level: "moderate" },
+  flooded_path:     { color: "#d97706", emoji: "💧", label: "Flooded Path",     level: "moderate" }
+};
+
+// Active severity — starts as normal
+var SEVERITY = SEVERITY_NORMAL;
+
 // ============================================================
 // APP STATE
 // ============================================================
 let map;
-let clickedLatLng  = null;
-let activeFilter   = "all";       // FEATURE 2 — current active filter
-const markerObjects = {};         // key → { marker, type }
-const allReports    = {};         // key → full report object
+let clickedLatLng    = null;
+let activeFilter     = "all";
+let colourBlindMode  = false;     // FEATURE 3
+const markerObjects  = {};
+const allReports     = {};
 
 // ============================================================
 // START
@@ -119,7 +132,6 @@ function loadReports() {
 
   reportsRef.on("value", function(snapshot) {
 
-    // Remove all existing markers from map
     Object.keys(markerObjects).forEach(function(k) {
       markerObjects[k].marker.remove();
       delete markerObjects[k];
@@ -134,26 +146,65 @@ function loadReports() {
     if (data) {
       Object.keys(data).forEach(function(key) {
         var report = data[key];
-
-        // Skip expired
         if (report.expiresAt && report.expiresAt < now) return;
 
         total++;
         active++;
-
-        // Store report for filtering
         allReports[key] = report;
-
         placeMarker(key, report);
       });
     }
 
     updateScore(total, active);
     updateCounter(active);
-
-    // Re-apply current filter after data refreshes
     applyFilter(activeFilter);
   });
+}
+
+// ============================================================
+// FEATURE 3 — TOGGLE COLOUR BLIND MODE
+// ============================================================
+function toggleColourBlindMode() {
+  colourBlindMode = !colourBlindMode;
+
+  // Switch which colour set is active
+  SEVERITY = colourBlindMode ? SEVERITY_COLOURBLIND : SEVERITY_NORMAL;
+
+  // Update button text and style
+  var btn = document.getElementById("cb-toggle-btn");
+  if (colourBlindMode) {
+    btn.textContent = "👁️ Disable Colour Blind Mode";
+    btn.classList.add("cb-active");
+    document.body.classList.add("cb-mode");
+    showToast("👁️ Colour Blind Mode ON — pins are now Blue / Yellow / Purple");
+  } else {
+    btn.textContent = "👁️ Enable Colour Blind Mode";
+    btn.classList.remove("cb-active");
+    document.body.classList.remove("cb-mode");
+    showToast("👁️ Colour Blind Mode OFF — normal colours restored");
+  }
+
+  // Redraw all markers with new colours
+  redrawAllMarkers();
+}
+
+// ============================================================
+// FEATURE 3 — REDRAW ALL MARKERS WITH NEW COLOURS
+// ============================================================
+function redrawAllMarkers() {
+  // Remove all current markers
+  Object.keys(markerObjects).forEach(function(k) {
+    markerObjects[k].marker.remove();
+    delete markerObjects[k];
+  });
+
+  // Redraw them all with the new colour set
+  Object.keys(allReports).forEach(function(key) {
+    placeMarker(key, allReports[key]);
+  });
+
+  // Re-apply current filter
+  applyFilter(activeFilter);
 }
 
 // ============================================================
@@ -162,7 +213,6 @@ function loadReports() {
 function setFilter(filterType) {
   activeFilter = filterType;
 
-  // Update button styles — highlight active button
   var buttons = document.querySelectorAll(".filter-btn");
   buttons.forEach(function(btn) {
     if (btn.getAttribute("data-filter") === filterType) {
@@ -176,22 +226,19 @@ function setFilter(filterType) {
 }
 
 // ============================================================
-// FEATURE 2 — APPLY FILTER TO MARKERS
+// FEATURE 2 — APPLY FILTER
 // ============================================================
 function applyFilter(filterType) {
   Object.keys(markerObjects).forEach(function(key) {
     var obj    = markerObjects[key];
     var report = allReports[key];
-
     if (!report) return;
 
     if (filterType === "all" || report.type === filterType) {
-      // Show this marker
       if (!map.hasLayer(obj.marker)) {
         obj.marker.addTo(map);
       }
     } else {
-      // Hide this marker
       if (map.hasLayer(obj.marker)) {
         obj.marker.remove();
       }
@@ -270,7 +317,6 @@ function placeMarker(key, report) {
     .addTo(map)
     .bindPopup(popupHTML);
 
-  // Store marker AND its type so filter can use it
   markerObjects[key] = { marker: marker, type: report.type };
 }
 
