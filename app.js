@@ -142,7 +142,27 @@ function loadReports() {
     }
 
     updateScore(total, active);
+
+    // FEATURE 1 — Update live report counter
+    updateCounter(active);
   });
+}
+
+// ============================================================
+// FEATURE 1 — UPDATE LIVE COUNTER
+// ============================================================
+function updateCounter(active) {
+  var el = document.getElementById("counter-number");
+  el.textContent = active;
+
+  // Change colour based on how many reports
+  if (active === 0) {
+    el.style.color = "#34d399";  // green — all clear
+  } else if (active <= 3) {
+    el.style.color = "#fbbf24";  // yellow — some issues
+  } else {
+    el.style.color = "#ef4444";  // red — many issues
+  }
 }
 
 // ============================================================
@@ -177,7 +197,6 @@ function placeMarker(key, report) {
   var timeAgo   = getTimeAgo(report.timestamp);
   var remaining = 3 - votes;
 
-  // Change button depending on whether this device already voted
   var buttonHTML = alreadyVoted
     ? '<button disabled style="' +
         'background:#334155; color:#94a3b8; border:none;' +
@@ -232,7 +251,6 @@ function placeMarker(key, report) {
 // ============================================================
 function markResolved(key) {
 
-  // Check if this device already voted on this specific pin
   var votedKey = "voted_" + key;
   if (localStorage.getItem(votedKey)) {
     showToast("⚠️ You have already marked this as resolved!");
@@ -253,14 +271,12 @@ function markResolved(key) {
     }
     if (committed && snapshot && snapshot.exists()) {
 
-      // Save to localStorage so this device cannot vote again
       localStorage.setItem(votedKey, "true");
 
       var votes     = snapshot.val().resolvedVotes;
       var remaining = 3 - votes;
 
       if (votes >= 3) {
-        // 3 votes reached — delete the report from Firebase
         firebase.database().ref("reports/" + key).remove();
         showToast("✅ Problem resolved! Pin removed for everyone.");
       } else {
