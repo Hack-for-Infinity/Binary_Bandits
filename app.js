@@ -22,12 +22,12 @@ const CAMPUS_ZOOM = 17;
 // OBSTACLE TYPES
 // ============================================================
 const SEVERITY = {
-  broken_elevator:  { color: "#ef4444", emoji: "🛗", label: "Broken Elevator",          level: "critical" },
-  blocked_entrance: { color: "#ef4444", emoji: "🔒", label: "Blocked Entrance",         level: "critical" },
-  blocked_ramp:     { color: "#f97316", emoji: "🚧", label: "Blocked Ramp",             level: "moderate" },
-  narrow_door:      { color: "#f97316", emoji: "🚪", label: "Narrow Door",              level: "moderate" },
-  steep_ramp:       { color: "#f97316", emoji: "📐", label: "Steep Ramp",               level: "moderate" },
-  flooded_path:     { color: "#f97316", emoji: "💧", label: "Flooded Path",             level: "moderate" }
+  broken_elevator:  { color: "#ef4444", emoji: "🛗", label: "Broken Elevator",  level: "critical" },
+  blocked_entrance: { color: "#ef4444", emoji: "🔒", label: "Blocked Entrance", level: "critical" },
+  blocked_ramp:     { color: "#f97316", emoji: "🚧", label: "Blocked Ramp",     level: "moderate" },
+  narrow_door:      { color: "#f97316", emoji: "🚪", label: "Narrow Door",      level: "moderate" },
+  steep_ramp:       { color: "#f97316", emoji: "📐", label: "Steep Ramp",       level: "moderate" },
+  flooded_path:     { color: "#f97316", emoji: "💧", label: "Flooded Path",     level: "moderate" }
 };
 
 // ============================================================
@@ -123,10 +123,10 @@ function loadReports() {
       delete markerObjects[k];
     });
 
-    var data  = snapshot.val();
-    var total = 0;
+    var data   = snapshot.val();
+    var total  = 0;
     var active = 0;
-    var now   = Date.now();
+    var now    = Date.now();
 
     if (data) {
       Object.keys(data).forEach(function(key) {
@@ -149,8 +149,11 @@ function loadReports() {
 // PLACE A PIN ON THE MAP
 // ============================================================
 function placeMarker(key, report) {
-  var sev = SEVERITY[report.type] || SEVERITY["blocked_ramp"];
+  var sev   = SEVERITY[report.type] || SEVERITY["blocked_ramp"];
   var votes = report.resolvedVotes || 0;
+
+  // Check if this device already voted on this pin
+  var alreadyVoted = localStorage.getItem("voted_" + key) ? true : false;
 
   var icon = L.divIcon({
     className: "",
@@ -171,8 +174,25 @@ function placeMarker(key, report) {
     popupAnchor: [0, -36]
   });
 
-  var timeAgo = getTimeAgo(report.timestamp);
+  var timeAgo   = getTimeAgo(report.timestamp);
   var remaining = 3 - votes;
+
+  // Change button depending on whether this device already voted
+  var buttonHTML = alreadyVoted
+    ? '<button disabled style="' +
+        'background:#334155; color:#94a3b8; border:none;' +
+        'padding:10px 14px; border-radius:6px;' +
+        'font-size:0.9rem; width:100%; font-weight:bold; cursor:not-allowed;' +
+      '">' +
+        '✅ You already voted (' + votes + '/3)' +
+      '</button>'
+    : '<button onclick="markResolved(\'' + key + '\')" style="' +
+        'background:#22c55e; color:white; border:none;' +
+        'padding:10px 14px; border-radius:6px; cursor:pointer;' +
+        'font-size:0.9rem; width:100%; font-weight:bold;' +
+      '">' +
+        '✅ Mark as Resolved (' + votes + '/3)' +
+      '</button>';
 
   var popupHTML =
     '<div style="min-width:210px; font-family:sans-serif;">' +
@@ -191,20 +211,12 @@ function placeMarker(key, report) {
         'font-size:0.8rem; color:#94a3b8; text-align:center;' +
       '">' +
         '🗳️ ' + votes + '/3 people marked this resolved' +
-        (remaining > 0
+        (remaining > 0 && !alreadyVoted
           ? ' — <span style="color:#fbbf24;">' + remaining + ' more needed</span>'
           : '') +
       '</div>' +
 
-      '<button ' +
-        'onclick="markResolved(\'' + key + '\')" ' +
-        'style="' +
-          'background:#22c55e; color:white; border:none;' +
-          'padding:10px 14px; border-radius:6px; cursor:pointer;' +
-          'font-size:0.9rem; width:100%; font-weight:bold;' +
-        '">' +
-        '✅ Mark as Resolved (' + votes + '/3)' +
-      '</button>' +
+      buttonHTML +
 
     '</div>';
 
@@ -216,9 +228,17 @@ function placeMarker(key, report) {
 }
 
 // ============================================================
-// MARK AS RESOLVED — removes pin when 3 people vote
+// MARK AS RESOLVED — one vote per device per pin
 // ============================================================
 function markResolved(key) {
+
+  // Check if this device already voted on this specific pin
+  var votedKey = "voted_" + key;
+  if (localStorage.getItem(votedKey)) {
+    showToast("⚠️ You have already marked this as resolved!");
+    return;
+  }
+
   var ref = firebase.database().ref("reports/" + key);
 
   ref.transaction(function(report) {
@@ -232,13 +252,18 @@ function markResolved(key) {
       return;
     }
     if (committed && snapshot && snapshot.exists()) {
-      var votes = snapshot.val().resolvedVotes;
+
+      // Save to localStorage so this device cannot vote again
+      localStorage.setItem(votedKey, "true");
+
+      var votes     = snapshot.val().resolvedVotes;
+      var remaining = 3 - votes;
+
       if (votes >= 3) {
         // 3 votes reached — delete the report from Firebase
         firebase.database().ref("reports/" + key).remove();
         showToast("✅ Problem resolved! Pin removed for everyone.");
       } else {
-        var remaining = 3 - votes;
         showToast("👍 Marked! " + remaining + " more person(s) needed to remove pin.");
       }
     }
