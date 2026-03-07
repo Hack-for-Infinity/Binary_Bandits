@@ -18,11 +18,19 @@
     <div id="report-counter">
       📍 <span id="counter-number">0</span> active obstacles reported right now
     </div>
+
+    <!-- FEATURE 3 — Colour Blind Mode Toggle -->
+    <div id="cb-toggle-wrapper">
+      <button id="cb-toggle-btn" onclick="toggleColourBlindMode()">
+        👁️ Enable Colour Blind Mode
+      </button>
+    </div>
+
   </div>
 
   <!-- FEATURE 2 — Filter Buttons Bar -->
   <div id="filter-bar">
-    <button class="filter-btn active" onclick="setFilter('all')"       data-filter="all">📋 All</button>
+    <button class="filter-btn active" onclick="setFilter('all')"              data-filter="all">📋 All</button>
     <button class="filter-btn"        onclick="setFilter('broken_elevator')"  data-filter="broken_elevator">🛗 Elevators</button>
     <button class="filter-btn"        onclick="setFilter('blocked_ramp')"     data-filter="blocked_ramp">🚧 Ramps</button>
     <button class="filter-btn"        onclick="setFilter('narrow_door')"      data-filter="narrow_door">🚪 Doors</button>
@@ -35,9 +43,9 @@
 
   <div id="legend">
     <h3>📌 Legend:</h3>
-    <div><span class="dot red"></span> 🚨 Critical</div>
-    <div><span class="dot orange"></span> ⚠️ Moderate</div>
-    <div><span class="dot green"></span> ✅ Resolved</div>
+    <div><span class="dot red"></span>   <span class="legend-critical">🚨 Critical</span></div>
+    <div><span class="dot orange"></span> <span class="legend-moderate">⚠️ Moderate</span></div>
+    <div><span class="dot green"></span>  <span class="legend-resolved">✅ Resolved</span></div>
   </div>
 
   <div id="modal-overlay" class="hidden">
