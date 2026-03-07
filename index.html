@@ -15,12 +15,20 @@
       📊 Campus Accessibility Score: <span id="score">Calculating...</span>
     </div>
     <p id="subtitle">📍 Tap anywhere on the map to report an accessibility obstacle</p>
-
-    <!-- FEATURE 1 — Live Report Counter -->
     <div id="report-counter">
       📍 <span id="counter-number">0</span> active obstacles reported right now
     </div>
+  </div>
 
+  <!-- FEATURE 2 — Filter Buttons Bar -->
+  <div id="filter-bar">
+    <button class="filter-btn active" onclick="setFilter('all')"       data-filter="all">📋 All</button>
+    <button class="filter-btn"        onclick="setFilter('broken_elevator')"  data-filter="broken_elevator">🛗 Elevators</button>
+    <button class="filter-btn"        onclick="setFilter('blocked_ramp')"     data-filter="blocked_ramp">🚧 Ramps</button>
+    <button class="filter-btn"        onclick="setFilter('narrow_door')"      data-filter="narrow_door">🚪 Doors</button>
+    <button class="filter-btn"        onclick="setFilter('flooded_path')"     data-filter="flooded_path">💧 Flooded</button>
+    <button class="filter-btn"        onclick="setFilter('blocked_entrance')" data-filter="blocked_entrance">🔒 Entrances</button>
+    <button class="filter-btn"        onclick="setFilter('steep_ramp')"       data-filter="steep_ramp">📐 Steep</button>
   </div>
 
   <div id="map"></div>
@@ -43,7 +51,7 @@
         <option value="blocked_ramp">🚧 Blocked Ramp</option>
         <option value="narrow_door">🚪 Narrow Door</option>
         <option value="flooded_path">💧 Flooded / Wet Path</option>
-        <option value="blocked_entrance">��� Blocked Accessible Entrance</option>
+        <option value="blocked_entrance">🔒 Blocked Accessible Entrance</option>
         <option value="steep_ramp">📐 Steep Ramp</option>
       </select>
 
