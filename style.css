@@ -47,7 +47,6 @@ body {
   margin-top: 4px;
 }
 
-/* FEATURE 1 — Live Report Counter */
 #report-counter {
   display: inline-block;
   margin-top: 8px;
@@ -64,6 +63,43 @@ body {
   color: #f97316;
   font-weight: bold;
   font-size: 1rem;
+}
+
+/* FEATURE 2 — Filter Bar */
+#filter-bar {
+  background: #1e293b;
+  padding: 10px 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #334155;
+  align-items: center;
+}
+
+.filter-btn {
+  background: #0f172a;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  background: #1e3a5f;
+  color: #f1f5f9;
+  border-color: #3b82f6;
+}
+
+.filter-btn.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+  font-weight: bold;
 }
 
 #map {
@@ -209,7 +245,8 @@ button:active { transform: scale(0.97); }
 }
 
 @media (max-width: 600px) {
-  #header h1 { font-size: 1.4rem; }
-  #legend { font-size: 0.75rem; }
-  #report-counter { font-size: 0.75rem; }
+  #header h1       { font-size: 1.4rem; }
+  #legend          { font-size: 0.75rem; }
+  #report-counter  { font-size: 0.75rem; }
+  .filter-btn      { font-size: 0.75rem; padding: 5px 10px; }
 }
