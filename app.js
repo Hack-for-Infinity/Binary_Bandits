@@ -1,63 +1,48 @@
 // ====================================================
-// FIREBASE CONFIG — you will fill this in soon
+// FIREBASE CONFIG — your real keys are already here ✅
 // ====================================================
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBQg_-PRD8Ix0DTFLqPPUDWH0hSJLWZ0fk",
-  authDomain: "accessmap-infinity.firebaseapp.com",
-  databaseURL: "https://accessmap-infinity-default-rtdb.firebaseio.com",
-  projectId: "accessmap-infinity",
-  storageBucket: "accessmap-infinity.firebasestorage.app",
+  apiKey:            "AIzaSyBQg_-PRD8Ix0DTFLqPPUDWH0hSJLWZ0fk",
+  authDomain:        "accessmap-infinity.firebaseapp.com",
+  databaseURL:       "https://accessmap-infinity-default-rtdb.firebaseio.com",
+  projectId:         "accessmap-infinity",
+  storageBucket:     "accessmap-infinity.firebasestorage.app",
   messagingSenderId: "1035902927452",
-  appId: "1:1035902927452:web:22936174d8a7459d645c99",
-  measurementId: "G-FGXK28HW88"
+  appId:             "1:1035902927452:web:22936174d8a7459d645c99"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
 // ====================================================
-// YOUR CAMPUS COORDINATES
-// Go to google.com/maps → search your university
-// Right-click on campus → copy the two numbers shown
-// First number = LAT, Second number = LNG
+// CAMPUS COORDINATES — your campus is already set ✅
 // ====================================================
-const CAMPUS_LAT  = 24.8607;   // ← replace with your lat
-const CAMPUS_LNG  = 67.0011;   // ← replace with your lng
+const CAMPUS_LAT  = 17.39198;
+const CAMPUS_LNG  = 78.31944;
 const CAMPUS_ZOOM = 17;
 
 // ====================================================
 // OBSTACLE TYPES
 // ====================================================
 const SEVERITY = {
-  broken_elevator:  { color: "#ef4444", emoji: "🛗",  label: "Broken Elevator",   level: "critical" },
-  blocked_entrance: { color: "#ef4444", emoji: "🔒",  label: "Blocked Entrance",  level: "critical" },
-  blocked_ramp:     { color: "#f97316", emoji: "🚧",  label: "Blocked Ramp",      level: "moderate" },
-  narrow_door:      { color: "#f97316", emoji: "🚪",  label: "Narrow Door",       level: "moderate" },
-  steep_ramp:       { color: "#f97316", emoji: "📐",  label: "Steep Ramp",        level: "moderate" },
-  flooded_path:     { color: "#f97316", emoji: "💧",  label: "Flooded Path",      level: "moderate" },
-  resolved:         { color: "#22c55e", emoji: "✅",  label: "Resolved",          level: "resolved"  }
+  broken_elevator:  { color: "#ef4444", emoji: "🛗",  label: "Broken Elevator",  level: "critical" },
+  blocked_entrance: { color: "#ef4444", emoji: "🔒",  label: "Blocked Entrance", level: "critical" },
+  blocked_ramp:     { color: "#f97316", emoji: "🚧",  label: "Blocked Ramp",     level: "moderate" },
+  narrow_door:      { color: "#f97316", emoji: "🚪",  label: "Narrow Door",      level: "moderate" },
+  steep_ramp:       { color: "#f97316", emoji: "📐",  label: "Steep Ramp",       level: "moderate" },
+  flooded_path:     { color: "#f97316", emoji: "💧",  label: "Flooded Path",     level: "moderate" },
+  resolved:         { color: "#22c55e", emoji: "✅",  label: "Resolved",         level: "resolved"  }
 };
 
 // ====================================================
-// APP STATE — do not touch these
+// APP STATE
 // ====================================================
 let map;
 let clickedLatLng = null;
 const markerObjects = {};
 
 // ====================================================
-// START — runs automatically when the page loads
+// START — runs when page loads
 // ====================================================
 window.addEventListener("load", () => {
+  // Initialize Firebase using the compat SDK
   firebase.initializeApp(firebaseConfig);
   initMap();
   loadReports();
@@ -67,13 +52,19 @@ window.addEventListener("load", () => {
 // BUILD THE MAP
 // ====================================================
 function initMap() {
-  map = L.map("map").setView([CAMPUS_LAT, CAMPUS_LNG], CAMPUS_ZOOM);
+  // Create the Leaflet map
+  map = L.map("map", {
+    center: [CAMPUS_LAT, CAMPUS_LNG],
+    zoom: CAMPUS_ZOOM
+  });
 
+  // Add OpenStreetMap tiles — free, no key needed
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
     maxZoom: 19
   }).addTo(map);
 
+  // Click on map → open report form
   map.on("click", function (e) {
     clickedLatLng = e.latlng;
     openModal(e.latlng);
@@ -100,7 +91,7 @@ function closeModal() {
 }
 
 // ====================================================
-// SUBMIT REPORT → saves to Firebase
+// SUBMIT REPORT → save to Firebase
 // ====================================================
 function submitReport() {
   if (!clickedLatLng) return;
@@ -124,12 +115,13 @@ function submitReport() {
 }
 
 // ====================================================
-// LOAD ALL REPORTS from Firebase — live / real-time
+// LOAD REPORTS — real-time from Firebase
 // ====================================================
 function loadReports() {
   const reportsRef = firebase.database().ref("reports");
 
   reportsRef.on("value", (snapshot) => {
+    // Remove old markers
     Object.values(markerObjects).forEach(m => m.remove());
     Object.keys(markerObjects).forEach(k => delete markerObjects[k]);
 
