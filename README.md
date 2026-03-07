@@ -88,14 +88,8 @@ open index.html
 ⚠️ Note: For Firebase live sync to work, open via a local server or deploy to GitHub Pages.
 The map and UI will load offline, but real-time pins require a Firebase connection.
 
-To run with live server (recommended):
-bash# If you have VS Code, install Live Server extension
-# Right-click index.html → Open with Live Server
-
-# Or use Python:
-python -m http.server 8000
-# Then open http://localhost:8000
-Live deployment: Hosted on GitHub Pages at https://<username>.github.io/AccessMap
+To run :
+Press the link https://hack-for-infinity.github.io/Binary_Bandits
 
 📁 Project Structure
 AccessMap/
